@@ -1,0 +1,7 @@
+[project]
+name = "date-generator-design"
+version = "0.1.0"
+description = "Design-first stubs for a Date Generator with labeled design patterns."
+requires-python = ">=3.11"
+
+[tool.sphinx]  # optional; you’ll still edit conf.py
