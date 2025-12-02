@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="./">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>Date Generator – Design Documentation &#8212; Date Generator API (Design Stubs)</title>
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=5ecbeea2" />
+    <link rel="stylesheet" type="text/css" href="_static/basic.css?v=b08954a9" />
+    <link rel="stylesheet" type="text/css" href="_static/alabaster.css?v=27fed22d" />
+    <script src="_static/documentation_options.js?v=2709fde1"></script>
+    <script src="_static/doctools.js?v=9bcbadda"></script>
+    <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+   
+  <link rel="stylesheet" href="_static/custom.css" type="text/css" />
+  
+
+  
+  
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <section id="date-generator-design-documentation">
+<h1>Date Generator – Design Documentation<a class="headerlink" href="#date-generator-design-documentation" title="Link to this heading">¶</a></h1>
+<section id="overview">
+<h2>Overview<a class="headerlink" href="#overview" title="Link to this heading">¶</a></h2>
+<p>This project is a <strong>design-only</strong> midterm for a romantic or platonic date generator.</p>
+<p>The goal is to show a clear architecture and use of design patterns without fully
+implemented business logic or real external API calls.</p>
+<p>The generator is intended to:</p>
+<ul class="simple">
+<li><p>Ask about user preferences (romantic vs platonic, indoor vs outdoor).</p></li>
+<li><p>Respect budget tiers (for example: under $20, $20–40, $40–70, etc.).</p></li>
+<li><p>Use a location string and, later, mapping services.</p></li>
+<li><p>Optionally consider weather for outdoor plans.</p></li>
+<li><p>Assemble a short itinerary of activities that fits the constraints.</p></li>
+</ul>
+<p>For the midterm, the focus is on structure and patterns, not on a completed application.</p>
+</section>
+<section id="domain-model">
+<h2>Domain Model<a class="headerlink" href="#domain-model" title="Link to this heading">¶</a></h2>
+<p>The main domain concepts are:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">Activity</span></code> – abstract base for things to do (restaurant outings, park walks,
+concerts, museums). Implemented in <code class="docutils literal notranslate"><span class="pre">src/activities/</span></code>.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">Itinerary</span></code> – a composite object representing a full date plan, made up of
+a sequence of activities and a total estimated cost.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">ItineraryAssembler</span></code> – a small builder that constructs an <code class="docutils literal notranslate"><span class="pre">Itinerary</span></code> one
+activity at a time.</p></li>
+</ul>
+<p>Together these implement a <strong>Composite</strong> + <strong>Builder</strong> style design for plans.</p>
+</section>
+<section id="core-design-patterns">
+<h2>Core Design Patterns<a class="headerlink" href="#core-design-patterns" title="Link to this heading">¶</a></h2>
+<p>This project intentionally showcases several patterns:</p>
+<ul class="simple">
+<li><p><strong>Strategy</strong></p>
+<ul>
+<li><p><code class="docutils literal notranslate"><span class="pre">ScoringPolicy</span></code> in <code class="docutils literal notranslate"><span class="pre">src/core/scoring.py</span></code> defines how a set of activities
+is scored.</p></li>
+<li><p>Concrete strategies (such as a budget-focused policy) allow different
+ranking rules without changing the planner.</p></li>
+</ul>
+</li>
+<li><p><strong>Template Method</strong></p>
+<ul>
+<li><p><code class="docutils literal notranslate"><span class="pre">PlanGenerator</span></code> in <code class="docutils literal notranslate"><span class="pre">src/core/plan_generator.py</span></code> defines the high-level
+workflow for building a plan: gather candidates, apply constraints, score,
+and assemble an itinerary.</p></li>
+<li><p>Helper methods can be overridden in subclasses for special behaviors.</p></li>
+</ul>
+</li>
+<li><p><strong>Composite and Builder</strong></p>
+<ul>
+<li><p><code class="docutils literal notranslate"><span class="pre">Itinerary</span></code> and <code class="docutils literal notranslate"><span class="pre">Activity</span></code> form a Composite: an itinerary is a collection
+of activities but can be treated as a single object.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">ItineraryAssembler</span></code> acts as a simple Builder that incrementally constructs
+a valid itinerary.</p></li>
+</ul>
+</li>
+<li><p><strong>Adapter (and simple Factory Method)</strong></p>
+<ul>
+<li><p><code class="docutils literal notranslate"><span class="pre">WeatherProvider</span></code>, <code class="docutils literal notranslate"><span class="pre">MapsProvider</span></code>, and <code class="docutils literal notranslate"><span class="pre">PlacesProvider</span></code> in
+<code class="docutils literal notranslate"><span class="pre">src/providers/</span></code> act as adapter interfaces over future external services.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">StubPlaces</span></code> returns concrete activity objects and demonstrates a
+factory-style creation of domain objects without exposing details to the
+planner.</p></li>
+</ul>
+</li>
+<li><p><strong>Constraints Abstraction</strong></p>
+<ul>
+<li><p><code class="docutils literal notranslate"><span class="pre">Constraint</span></code> and concrete classes like <code class="docutils literal notranslate"><span class="pre">BudgetCeiling</span></code> in
+<code class="docutils literal notranslate"><span class="pre">src/core/constraints.py</span></code> express rules that filter out invalid activities.</p></li>
+<li><p>Multiple constraints can be combined without changing the planner itself.</p></li>
+</ul>
+</li>
+</ul>
+</section>
+<section id="modules">
+<h2>Modules<a class="headerlink" href="#modules" title="Link to this heading">¶</a></h2>
+<p>The code is organized as follows:</p>
+<ul class="simple">
+<li><p><code class="docutils literal notranslate"><span class="pre">src/activities/</span></code> – Abstract activity base class and concrete activities.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">src/core/</span></code> – Core planning elements (constraints, scoring, itinerary,
+plan generator).</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">src/providers/</span></code> – Adapter interfaces and stub implementations for weather,
+maps, and places.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">src/explain/</span></code> – <code class="docutils literal notranslate"><span class="pre">ExplanationEngine</span></code> for generating human-readable
+explanations.</p></li>
+<li><p><code class="docutils literal notranslate"><span class="pre">src/export/</span></code> – Placeholder for export logic (for example, PDF export).</p></li>
+</ul>
+</section>
+<section id="future-work">
+<h2>Future Work<a class="headerlink" href="#future-work" title="Link to this heading">¶</a></h2>
+<p>Future improvements could include:</p>
+<ul class="simple">
+<li><p>Implementing richer <code class="docutils literal notranslate"><span class="pre">ScoringPolicy</span></code> strategies (romance-focused,
+accessibility-focused, weather-aware).</p></li>
+<li><p>Integrating real external APIs for weather, mapping, and places.</p></li>
+<li><p>Expanding the catalog of activities to cover more types of dates.</p></li>
+<li><p>Building a user interface on top of the current design.</p></li>
+</ul>
+</section>
+</section>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="Main">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="#">Date Generator Design</a></h1>
+
+
+
+
+
+
+
+
+
+<search id="searchbox" style="display: none" role="search">
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" placeholder="Search"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</search>
+<script>document.getElementById('searchbox').style.display = "block"</script><h3>Navigation</h3>
+
+<div class="relations">
+<h3>Related Topics</h3>
+<ul>
+  <li><a href="#">Documentation overview</a><ul>
+  </ul></li>
+</ul>
+</div>
+
+
+
+
+
+
+
+
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &#169;2025, Isabella Cooper.
+      
+      |
+      Powered by <a href="https://www.sphinx-doc.org/">Sphinx 8.2.3</a>
+      &amp; <a href="https://alabaster.readthedocs.io">Alabaster 1.0.0</a>
+      
+      |
+      <a href="_sources/index.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>
