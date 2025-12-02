@@ -1,23 +1,66 @@
 # Romantic or Platonic Date Generator (Design-First Midterm)
 
-This project is a **design-focused** architecture for a Date Generator that proposes context-aware outings (romantic or platonic) using the user’s location, time, weather, season, preferences, and constraints. The current milestone ships **valid, runnable Python stubs** with exhaustive docstrings labeling every design element and pattern used. Future terms can fill in behavior.
+This project is a **design-focused** architecture for a Date Generator that proposes
+context-aware outings (romantic or platonic) using a user’s location, time, weather,
+season, preferences, and constraints.
 
-> This repository follows the planning document closely (components like `InputCollector`, `PlanGenerator`, `ItineraryAssembler`, `ScoringPolicy`, `Constraint`, external `Providers`, `Exporter`, `ExplanationEngine`, and typed `Activity` classes). Design emphasizes extensibility and clarity for documentation. :contentReference[oaicite:2]{index=2}
+This midterm milestone intentionally focuses on **software design and patterns**.
+The repository contains **valid, runnable Python stubs** that demonstrate structure,
+interfaces, and architectural decisions. Full application behavior and real API
+integrations are planned for future work.
+
+---
 
 ## Project Overview
 
-- **Goal:** Generate tailored itineraries with activities, timing, travel, cost notes, reservation hints, and weather-aware backups. :contentReference[oaicite:3]{index=3}
-- **Scope (midterm):** No real integrations yet; we deliver architecture, interfaces, and Sphinx docs as a static site in `/docs`.
+**Goal**
+
+Generate tailored date itineraries that may include:
+- Activities (restaurants, parks, museums, concerts)
+- Timing and duration notes
+- Budget awareness
+- Weather-aware filtering
+- Clear explanations of why activities were selected
+
+**Scope (Midterm)**
+
+- No real API integrations yet
+- No UI
+- Emphasis on architecture, extensibility, and documentation
+- Static HTML documentation generated with Sphinx
+
+---
+
+## Architecture Summary
+
+The design closely follows the original planning document and is organized around
+clear responsibilities:
+
+- **InputCollector** – Gathers user preferences and constraints
+- **PlanGenerator** – Coordinates itinerary generation using defined strategies
+- **Itinerary / ItineraryAssembler** – Composite + Builder for assembling date plans
+- **ScoringPolicy** – Strategy pattern for ranking candidate activities
+- **Constraint** – Encapsulates filtering rules like budget ceilings
+- **Providers** – Adapters for future external services (weather, maps, places)
+- **ExplanationEngine** – Produces human-readable explanations of plans
+- **Exporter** – Placeholder for exporting plans (PDF, etc.)
+- **Activity classes** – Typed domain models for different activity types
+
+---
 
 ## Tech & Language
 
 - **Language:** Python 3.11+
-- **Docs:** Sphinx (autodoc + napoleon), HTML emitted into `/docs` so it can be hosted as a static site (e.g., GitHub Pages).
+- **Documentation:** Sphinx (HTML output)
+- **Paradigm:** Object-oriented, design-pattern driven
+
+---
 
 ## Installation
 
 ```bash
-# clone your private repo
+# clone the repository
 python -m venv .venv
-source .venv/bin/activate  # Windows: .venv\Scripts\activate
+source .venv/bin/activate   # Windows: .venv\Scripts\activate
+
 pip install -r requirements.txt
