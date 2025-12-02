@@ -1,6 +1,24 @@
+# Virtual environments
 .venv/
+venv/
+
+# Python bytecode / caches
 __pycache__/
 *.pyc
+*.pyo
+*.pyd
+
+# Build artifacts
+build/
+dist/
+*.egg-info/
+
+# Sphinx build artifacts
+docs/_build/
+docs/build/
 .build/
 _build/
-docs/_sources/
+
+# Editor / OS junk
+.DS_Store
+Thumbs.db
